@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe Proyectos Zero · UCI 2021–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #F4F3EF;
+  --surface: #FFFFFF;
+  --border:  #E5E3DC;
+  --txt:     #1C1C1C;
+  --txt2:    #6B6B6B;
+  --muted:   #A8A8A8;
+  --nav-w:   230px;
+
+  --bmr-h:  #4B3FA0; --bmr-l:  #EEF0FB; --bmr-m:  #6C63CC;
+  --neum-h: #0F6E56; --neum-l: #E6F5F0; --neum-m: #1D9E75;
+  --itu-h:  #B54A00; --itu-l:  #FEF1E8; --itu-m:  #D85A30;
+  --bact-h: #155C7A; --bact-l: #E8F4FA; --bact-m: #2196C4;
+  --bsec-h: #6B2C7A; --bsec-l: #F5EEF8; --bsec-m: #9B59B6;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  width: var(--nav-w);
+  min-width: var(--nav-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.nav-logo {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo .pretitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.nav-logo h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--txt);
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+}
+.nav-logo .subt {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-family: 'DM Mono', monospace;
+}
+
+.nav-section { padding: 8px 12px; margin-top: 6px; }
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt2);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 2px;
+}
+.nav-btn:hover { background: var(--bg); color: var(--txt); }
+.nav-btn .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.nav-btn.active.bmr  { background: var(--bmr-l);  color: var(--bmr-h);  font-weight: 600; }
+.nav-btn.active.neum { background: var(--neum-l); color: var(--neum-h); font-weight: 600; }
+.nav-btn.active.itu  { background: var(--itu-l);  color: var(--itu-h);  font-weight: 600; }
+.nav-btn.active.bact { background: var(--bact-l); color: var(--bact-h); font-weight: 600; }
+.nav-btn.active.bsec { background: var(--bsec-l); color: var(--bsec-h); font-weight: 600; }
+
+.nav-legend {
+  padding: 16px 20px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+}
+.nav-legend-title {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.nav-legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.nl-swatch { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+.nl-line   { width: 16px; height: 3px; flex-shrink: 0; }
+
+/* ── FOOTER NAV ── */
+.nav-footer {
+  padding: 12px 20px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-family: 'DM Mono', monospace;
+}
+.nav-footer strong { display: block; color: var(--txt2); font-size: 11px; margin-bottom: 3px; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+
+/* ── MAIN ── */
+main { margin-left: var(--nav-w); flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.panel { display: none; flex: 1; flex-direction: column; }
+.panel.active { display: flex; }
+
+.panel-header {
+  padding: 32px 40px 24px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+.panel-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px; margin-bottom: 10px;
+}
+.panel-header h1 { font-size: 23px; font-weight: 600; letter-spacing: -0.4px; }
+.panel-header p  { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+.bmr  .panel-tag { background: var(--bmr-l);  color: var(--bmr-h); }
+.neum .panel-tag { background: var(--neum-l); color: var(--neum-h); }
+.itu  .panel-tag { background: var(--itu-l);  color: var(--itu-h); }
+.bact .panel-tag { background: var(--bact-l); color: var(--bact-h); }
+.bsec .panel-tag { background: var(--bsec-l); color: var(--bsec-h); }
+
+.panel-body { padding: 32px 40px 0; flex: 1; }
+
+/* ── FOOTER PANEL ── */
+.panel-footer {
+  margin: 40px 40px 0;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 0;
+}
+.footer-cc {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: var(--txt);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--surface);
+  letter-spacing: 0.5px;
+  font-family: 'DM Mono', monospace;
+}
+.footer-text {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-family: 'DM Mono', monospace;
+}
+.footer-text strong { color: var(--txt2); font-weight: 600; font-family: 'DM Sans', sans-serif; }
+
+/* ── SUBSECCIÓN ── */
+.sub-title {
+  font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--muted);
+  margin: 36px 0 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.sub-title:first-child { margin-top: 0; }
+
+/* ── CARDS ── */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 26px 26px 20px;
+  margin-bottom: 22px;
+}
+.card-top {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 12px; margin-bottom: 14px;
+}
+.card-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 4px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.chart-title    { font-size: 15px; font-weight: 600; color: var(--txt); line-height: 1.35; }
+.chart-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+.bmr  .card-label { background: var(--bmr-l);  color: var(--bmr-h); }
+.neum .card-label { background: var(--neum-l); color: var(--neum-h); }
+.itu  .card-label { background: var(--itu-l);  color: var(--itu-h); }
+.bact .card-label { background: var(--bact-l); color: var(--bact-h); }
+.bsec .card-label { background: var(--bsec-l); color: var(--bsec-h); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 14px; font-size: 12px; color: var(--txt2); }
+.legend-item   { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.legend-swatch { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+.legend-line   { width: 18px; height: 3px; flex-shrink: 0; }
+
+.canvas-wrap { position: relative; width: 100%; }
+.dual-note { font-size: 11px; color: var(--muted); margin-top: 8px; font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav>
+  <div class="nav-logo">
+    <div class="pretitle">Informe</div>
+    <h2>Proyectos Zero</h2>
+    <div class="subt">UCI · 2021–2025</div>
+  </div>
+
+  <div class="nav-section">
+    <button class="nav-btn bmr active"  onclick="show('bmr',this)"><span class="dot" style="background:#534AB7"></span>Bacterias Multiresistentes</button>
+    <button class="nav-btn neum"        onclick="show('neum',this)"><span class="dot" style="background:#1D9E75"></span>Neumonías UCI</button>
+    <button class="nav-btn itu"         onclick="show('itu',this)"><span class="dot" style="background:#D85A30"></span>ITU — Sonda Urinaria</button>
+    <button class="nav-btn bact"        onclick="show('bact',this)"><span class="dot" style="background:#2196C4"></span>Bacteriemias Catéter</button>
+    <button class="nav-btn bsec"        onclick="show('bsec',this)"><span class="dot" style="background:#9B59B6"></span>Bacteriemias Secundarias</button>
+  </div>
+
+  <div class="nav-legend" style="margin-top:auto;">
+    <div class="nav-legend-title">Leyenda comparativa</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</div>
+    <div class="nav-legend-row"><span class="nl-line"   style="background:#D85A30"></span>Nacional (eje dcho.)</div>
+    <div class="nav-legend-title" style="margin-top:12px;">Desglose temporal</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#3C3489"></span>2021</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#534AB7"></span>2022</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#7F77DD"></span>2023</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#1D9E75"></span>2024</div>
+    <div class="nav-legend-row"><span class="nl-swatch" style="background:#0F6E56"></span>2025</div>
+  </div>
+
+  <div class="nav-footer">
+    <strong>Dr. Salvador Villalgordo</strong>
+    OptiH · CC BY-NC 4.0<br>Abril 2026
+  </div>
+</nav>
+
+<!-- ══════ MAIN ══════ -->
+<main>
+
+<!-- ── BMR ── -->
+<div id="panel-bmr" class="panel bmr active">
+  <div class="panel-header">
+    <div class="panel-tag">BMR</div>
+    <h1>Bacterias Multiresistentes</h1>
+    <p>Período de estudio: 01/01/2021 – 31/12/2025 · Unidad · Asturias · Nacional</p>
+  </div>
+  <div class="panel-body">
+
+    <div class="sub-title">Indicadores generales</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Total de pacientes con BMR por año</div><div class="chart-subtitle">Número absoluto de pacientes con una o más bacterias multiresistentes</div></div><span class="card-label">Total</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bmr1"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">BMR adquirida durante el ingreso (&gt;48h en UCI)</div><div class="chart-subtitle">Pacientes con infección o colonización adquirida dentro de la UCI</div></div><span class="card-label">Nosocomial</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bmr2"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Pacientes con infección activa por BMR</div><div class="chart-subtitle">Solo los que desarrollaron infección real, excluyendo portadores asintomáticos</div></div><span class="card-label">Infección</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bmr3"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="sub-title">Tasas de exposición y colonización</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Días de antibioterapia por 1.000 días de estancia</div><div class="chart-subtitle">Consumo de antibiótico como indicador de presión selectiva sobre las BMR</div></div><span class="card-label">ATB</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias</span><span class="legend-item"><span class="legend-swatch" style="background:#D85A30"></span>Nacional</span></div>
+      <div class="canvas-wrap" style="height:275px"><canvas id="bmr_atb"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Colonizados o infectados por BMR por 1.000 días de estancia</div><div class="chart-subtitle">Tasa de aparición de BMR durante el ingreso en UCI (&gt;48h) — colonización + infección</div></div><span class="card-label">Tasa estancia</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bmr_col_est"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Colonizados o infectados por BMR por 100 pacientes ingresados</div><div class="chart-subtitle">Frecuencia relativa de aparición de BMR en relación al total de pacientes atendidos</div></div><span class="card-label">Tasa pacientes</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bmr_col_pte"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="sub-title">Relación de bacterias multiresistentes</div>
+
+    <div class="chart-card" style="border-left: 4px solid var(--bmr-m);">
+      <div class="card-top"><div><div class="chart-title">Total BMR vs. adquiridas durante ingreso en UCI — evolución comparativa</div><div class="chart-subtitle">Barras apiladas: porción adquirida en UCI (oscuro) sobre el total (claro) · Línea = % nosocomial sobre total</div></div><span class="card-label">Clave</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:14px;font-size:12px;color:var(--txt2);">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:22px;height:11px;border-radius:3px;background:#534AB7;display:inline-block;"></span>Unidad — total BMR</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:22px;height:11px;border-radius:3px;background:#534AB755;border:1.5px dashed #534AB7;display:inline-block;"></span>Unidad — adquirida UCI</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:22px;height:11px;border-radius:3px;background:#1D9E75;display:inline-block;"></span>Asturias — total BMR</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:22px;height:11px;border-radius:3px;background:#1D9E7555;border:1.5px dashed #1D9E75;display:inline-block;"></span>Asturias — adquirida UCI</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:22px;height:3px;background:#D85A30;display:inline-block;"></span>% nosocomial Unidad (eje dcho.)</span>
+      </div>
+      <div class="canvas-wrap" style="height:360px"><canvas id="bmr_evol"></canvas></div>
+      <p class="dual-note">Las barras muestran el total; la porción inferior (más oscura) representa las BMR generadas dentro de la UCI. La línea naranja refleja qué porcentaje del total es nosocomial.</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">BMR al ingreso y durante el ingreso — Unidad</div><div class="chart-subtitle">Número total de aislamientos por microorganismo detectados al ingreso y durante la estancia en UCI</div></div><span class="card-label">Al ingreso + durante</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:360px"><canvas id="bmr_rel1"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">BMR durante el ingreso incluyendo colonización e infección — Unidad</div><div class="chart-subtitle">Aislamientos adquiridos dentro de la UCI (&gt;48h): portadores asintomáticos e infección activa</div></div><span class="card-label">Durante ingreso</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:360px"><canvas id="bmr_rel2"></canvas></div>
+    </div>
+
+    <div class="sub-title">Microorganismos más frecuentes</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos BMR — Unidad, desglose por año</div><div class="chart-subtitle">Aislamientos al ingreso + durante el ingreso · Los ceros no se etiquetan</div></div><span class="card-label">Unidad</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="bmr4"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos BMR — Asturias, desglose por año</div><div class="chart-subtitle">Aislamientos al ingreso + durante el ingreso · Los ceros no se etiquetan</div></div><span class="card-label">Asturias</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="bmr5"></canvas></div>
+    </div>
+
+  </div>
+  <div class="panel-footer">
+    <div class="footer-cc">CC</div>
+    <div class="footer-text"><strong>© Dr. Salvador Villalgordo · OptiH</strong>Licencia CC BY-NC 4.0 · Se permite uso y adaptación no comercial con atribución · Abril 2026</div>
+  </div>
+</div>
+
+<!-- ── NEUMONÍA ── -->
+<div id="panel-neum" class="panel neum">
+  <div class="panel-header">
+    <div class="panel-tag">Neumonía</div>
+    <h1>Neumonías UCI</h1>
+    <p>Período de estudio: 01/01/2021 – 31/12/2025 · Unidad · Asturias · Nacional</p>
+  </div>
+  <div class="panel-body">
+    <div class="sub-title">Indicadores generales</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Total de neumonías por año</div><div class="chart-subtitle">Número absoluto de neumonías registradas en UCI</div></div><span class="card-label">Total</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="neum1"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de neumonía por 1.000 días de estancia</div><div class="chart-subtitle">Neumonías por cada 1.000 días de estancia en UCI</div></div><span class="card-label">Tasa estancia</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="neum2"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de neumonía por 1.000 días de ventilación mecánica (VM)</div><div class="chart-subtitle">Neumonías por cada 1.000 días de VM — indicador de riesgo directo</div></div><span class="card-label">Tasa VM</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="neum3"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="sub-title">Microorganismos más frecuentes</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos Neumonía — Unidad, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Unidad</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="neum4"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos Neumonía — Asturias, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Asturias</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="neum5"></canvas></div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="footer-cc">CC</div>
+    <div class="footer-text"><strong>© Dr. Salvador Villalgordo · OptiH</strong>Licencia CC BY-NC 4.0 · Se permite uso y adaptación no comercial con atribución · Abril 2026</div>
+  </div>
+</div>
+
+<!-- ── ITU ── -->
+<div id="panel-itu" class="panel itu">
+  <div class="panel-header">
+    <div class="panel-tag">ITU</div>
+    <h1>Infecciones de Tracto Urinario — Sonda</h1>
+    <p>Período de estudio: 01/01/2021 – 31/12/2025 · Unidad · Asturias · Nacional</p>
+  </div>
+  <div class="panel-body">
+    <div class="sub-title">Indicadores generales</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Total de ITUs por año</div><div class="chart-subtitle">Número absoluto de infecciones de sonda urinaria registradas en UCI</div></div><span class="card-label">Total</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="itu1"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de ITU por 1.000 días de estancia</div><div class="chart-subtitle">Infecciones de sonda urinaria por cada 1.000 días de estancia en UCI</div></div><span class="card-label">Tasa estancia</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="itu2"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de ITU por 1.000 días de sonda urinaria (SU)</div><div class="chart-subtitle">Infecciones por cada 1.000 días de uso de sonda — indicador de riesgo directo</div></div><span class="card-label">Tasa SU</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="itu3"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="sub-title">Microorganismos más frecuentes</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos ITU — Unidad, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Unidad</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="itu4"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos ITU — Asturias, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Asturias</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="itu5"></canvas></div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="footer-cc">CC</div>
+    <div class="footer-text"><strong>© Dr. Salvador Villalgordo · OptiH</strong>Licencia CC BY-NC 4.0 · Se permite uso y adaptación no comercial con atribución · Abril 2026</div>
+  </div>
+</div>
+
+<!-- ── BACTERIEMIAS CATÉTER ── -->
+<div id="panel-bact" class="panel bact">
+  <div class="panel-header">
+    <div class="panel-tag">Bacteriemias catéter</div>
+    <h1>Bacteriemias — Catéter Venoso Central</h1>
+    <p>Período de estudio: 01/01/2021 – 31/12/2025 · Unidad · Asturias · Nacional</p>
+  </div>
+  <div class="panel-body">
+    <div class="sub-title">Indicadores generales</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Total de bacteriemias asociadas a catéter por año</div><div class="chart-subtitle">Número absoluto de bacteriemias primarias y secundarias a infección de catéter</div></div><span class="card-label">Total</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bp1"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de bacteriemia por 1.000 días de estancia</div><div class="chart-subtitle">Bacteriemias por cada 1.000 días de estancia en UCI</div></div><span class="card-label">Tasa estancia</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bp2"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de bacteriemia por 1.000 días de catéter venoso central (CVC)</div><div class="chart-subtitle">Indicador de riesgo directo asociado al uso del catéter</div></div><span class="card-label">Tasa CVC</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bp3"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="sub-title">Microorganismos más frecuentes</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos Bacteriemia catéter — Unidad, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Unidad</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="bp4"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos Bacteriemia catéter — Asturias, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Asturias</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="bp5"></canvas></div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="footer-cc">CC</div>
+    <div class="footer-text"><strong>© Dr. Salvador Villalgordo · OptiH</strong>Licencia CC BY-NC 4.0 · Se permite uso y adaptación no comercial con atribución · Abril 2026</div>
+  </div>
+</div>
+
+<!-- ── BACTERIEMIAS SECUNDARIAS ── -->
+<div id="panel-bsec" class="panel bsec">
+  <div class="panel-header">
+    <div class="panel-tag">Bacteriemias secundarias</div>
+    <h1>Bacteriemias Secundarias a Otros Focos</h1>
+    <p>Período de estudio: 01/01/2021 – 31/12/2025 · Unidad · Asturias · Nacional</p>
+  </div>
+  <div class="panel-body">
+    <div class="sub-title">Indicadores generales</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Total de bacteriemias secundarias por año</div><div class="chart-subtitle">Número absoluto de bacteriemias secundarias a otros focos registradas en UCI</div></div><span class="card-label">Total</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bs1"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Tasa de bacteriemia secundaria por 1.000 días de estancia</div><div class="chart-subtitle">Bacteriemias secundarias por cada 1.000 días de estancia en UCI</div></div><span class="card-label">Tasa estancia</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>Unidad (eje izq.)</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>Asturias (eje izq.)</span><span class="legend-item"><span class="legend-line" style="background:#D85A30"></span>Nacional (eje dcho.)</span></div>
+      <div class="canvas-wrap" style="height:265px"><canvas id="bs2"></canvas></div>
+      <p class="dual-note">■ Eje izquierdo: Unidad y Asturias · ■ Eje derecho: Nacional</p>
+    </div>
+
+    <div class="sub-title">Microorganismos más frecuentes</div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos Bacteriemia secundaria — Unidad, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Unidad</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="bs3"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-top"><div><div class="chart-title">Microorganismos Bacteriemia secundaria — Asturias, desglose por año</div><div class="chart-subtitle">Top 5 gérmenes acumulados 2021–2025 · Los ceros no se etiquetan</div></div><span class="card-label">Asturias</span></div>
+      <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#3C3489"></span>2021</span><span class="legend-item"><span class="legend-swatch" style="background:#534AB7"></span>2022</span><span class="legend-item"><span class="legend-swatch" style="background:#7F77DD"></span>2023</span><span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>2024</span><span class="legend-item"><span class="legend-swatch" style="background:#0F6E56"></span>2025</span></div>
+      <div class="canvas-wrap" style="height:350px"><canvas id="bs4"></canvas></div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="footer-cc">CC</div>
+    <div class="footer-text"><strong>© Dr. Salvador Villalgordo · OptiH</strong>Licencia CC BY-NC 4.0 · Se permite uso y adaptación no comercial con atribución · Abril 2026</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+Chart.register(ChartDataLabels);
+const YEARS=['2021','2022','2023','2024','2025'];
+const cU='#534AB7',cA='#1D9E75',cN='#D85A30';
+const GRID='rgba(0,0,0,0.06)';
+const PAL=['#3C3489','#534AB7','#7F77DD','#1D9E75','#0F6E56'];
+
+function show(s,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+s).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function dualAxis(id,u,a,n,dec){
+  new Chart(document.getElementById(id),{
+    data:{labels:YEARS,datasets:[
+      {type:'bar',label:'Unidad',data:u,backgroundColor:cU+'CC',yAxisID:'yL',order:2,
+       datalabels:{anchor:'end',align:'top',color:cU,font:{size:11,weight:'500'},formatter:v=>dec?v.toFixed(2):v}},
+      {type:'bar',label:'Asturias',data:a,backgroundColor:cA+'CC',yAxisID:'yL',order:2,
+       datalabels:{anchor:'end',align:'top',color:'#0a6647',font:{size:11,weight:'500'},formatter:v=>dec?v.toFixed(2):v}},
+      {type:'line',label:'Nacional',data:n,borderColor:cN,backgroundColor:'transparent',
+       borderWidth:2.5,pointRadius:5,pointBackgroundColor:cN,yAxisID:'yR',order:1,tension:0.3,
+       datalabels:{anchor:'end',align:'top',color:cN,font:{size:11,weight:'500'},formatter:v=>dec?v.toFixed(2):v.toLocaleString('es-ES')}}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28}},
+      plugins:{legend:{display:false},datalabels:{}},
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#888',font:{size:11}}},
+        yL:{position:'left',grid:{color:GRID},ticks:{color:cU,font:{size:11}},title:{display:true,text:'Unidad / Asturias',color:'#bbb',font:{size:10}}},
+        yR:{position:'right',grid:{drawOnChartArea:false},ticks:{color:cN,font:{size:11}},title:{display:true,text:'Nacional',color:cN,font:{size:10}}}
+      }}
+  });
+}
+
+function tripleLines(id,u,a,n){
+  new Chart(document.getElementById(id),{
+    type:'line',
+    data:{labels:YEARS,datasets:[
+      {label:'Unidad',data:u,borderColor:cU,backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:cU,tension:0.3,
+       datalabels:{anchor:'end',align:'top',color:cU,font:{size:11,weight:'500'},formatter:v=>v.toFixed(2)}},
+      {label:'Asturias',data:a,borderColor:cA,backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:cA,tension:0.3,
+       datalabels:{anchor:'end',align:'bottom',color:'#0a6647',font:{size:11,weight:'500'},formatter:v=>v.toFixed(2)}},
+      {label:'Nacional',data:n,borderColor:cN,backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:cN,tension:0.3,
+       datalabels:{anchor:'end',align:'top',color:cN,font:{size:11,weight:'500'},formatter:v=>v.toFixed(2)}}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28,bottom:16}},
+      plugins:{legend:{display:false},datalabels:{}},
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#888',font:{size:11}}},
+        y:{grid:{color:GRID},ticks:{color:'#888',font:{size:11}},title:{display:true,text:'Días ATB / 1.000 días estancia',color:'#bbb',font:{size:10}}}
+      }}
+  });
+}
+
+function grouped(id,labels,byYear){
+  new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels,datasets:byYear.map((d,i)=>({
+      label:YEARS[i],data:d,backgroundColor:PAL[i]+'DD',
+      datalabels:{anchor:'end',align:'top',color:PAL[i],font:{size:10,weight:'500'},formatter:v=>v===0?'':v}
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},
+      plugins:{legend:{display:false},datalabels:{}},
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#888',font:{size:10},maxRotation:10}},
+        y:{grid:{color:GRID},beginAtZero:true,ticks:{color:'#888',font:{size:11}},title:{display:true,text:'Nº aislamientos',color:'#bbb',font:{size:10}}}
+      }}
+  });
+}
+
+/* ══ DATOS ══ */
+dualAxis('bmr1',[78,48,48,47,38],[258,223,219,263,262],[5184,5558,6131,7038,7276],false);
+dualAxis('bmr2',[60,22,14,10,12],[186,105,90,109,104],[2720,2261,2136,2097,2069],false);
+dualAxis('bmr3',[38,20,13,15,8],[130,85,73,85,59],[1977,1943,1879,2011,2001],false);
+tripleLines('bmr_atb',[561.23,583.01,564.34,600.39,569.54],[622.80,630.82,608.99,607.79,606.16],[604.17,604.98,601.94,608.62,599.81]);
+dualAxis('bmr_col_est',[14.46,9.39,6.43,4.92,6.09],[7.62,5.01,4.54,5.21,5.31],[3.51,2.95,2.76,2.58,2.53],true);
+dualAxis('bmr_col_pte',[10.31,4.07,2.49,1.85,2.13],[6.55,3.43,2.59,3.10,2.96],[2.51,1.74,1.47,1.36,1.34],true);
+/* ── Gráfica especial: Total BMR vs adquiridas en UCI con % nosocomial ── */
+(function(){
+  /* Totales de las tablas de microorganismos (suma de todos los gérmenes) */
+  const uTotal  = [101, 55,  53,  50,  48];
+  const uNoso   = [78,  26,  18,  11,  14];   /* adquiridas >48h en UCI */
+  const aTotal  = [336, 274, 278, 331, 322];
+  const aNoso   = [251, 127, 123, 143, 139];
+  /* % nosocomial sobre total */
+  const uPct = uTotal.map((t,i)=> t>0 ? Math.round(uNoso[i]/t*100) : 0);
+  const aPct = aTotal.map((t,i)=> t>0 ? Math.round(aNoso[i]/t*100) : 0);
+
+  new Chart(document.getElementById('bmr_evol'), {
+    data: {
+      labels: YEARS,
+      datasets: [
+        /* Unidad total (fondo claro) */
+        { type:'bar', label:'Unidad — total', data: uTotal,
+          backgroundColor:'#534AB733', borderColor:'#534AB7', borderWidth:1.5,
+          yAxisID:'yL', order:3,
+          datalabels:{ display:false } },
+        /* Unidad nosocomial (encima, sólido) */
+        { type:'bar', label:'Unidad — UCI', data: uNoso,
+          backgroundColor:'#534AB7CC', yAxisID:'yL', order:2,
+          datalabels:{ anchor:'end', align:'top', color:'#4B3FA0', font:{size:11,weight:'600'},
+            formatter:(v,ctx)=>{ const t=uTotal[ctx.dataIndex]; return v+'/'+ t; } } },
+        /* Asturias total (fondo claro) */
+        { type:'bar', label:'Asturias — total', data: aTotal,
+          backgroundColor:'#1D9E7533', borderColor:'#1D9E75', borderWidth:1.5,
+          yAxisID:'yL', order:3,
+          datalabels:{ display:false } },
+        /* Asturias nosocomial */
+        { type:'bar', label:'Asturias — UCI', data: aNoso,
+          backgroundColor:'#1D9E75AA', yAxisID:'yL', order:2,
+          datalabels:{ display:false } },
+        /* Línea % nosocomial Unidad */
+        { type:'line', label:'% nosocomial Unidad', data: uPct,
+          borderColor:'#D85A30', backgroundColor:'transparent',
+          borderWidth:2.5, pointRadius:6, pointBackgroundColor:'#D85A30',
+          pointBorderColor:'#fff', pointBorderWidth:2,
+          yAxisID:'yR', order:1, tension:0.3,
+          datalabels:{ anchor:'end', align:'top', color:'#D85A30', font:{size:11,weight:'600'},
+            formatter:v=>v+'%' } }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{ padding:{ top:32 } },
+      plugins:{ legend:{ display:false }, datalabels:{} },
+      scales:{
+        x:{ grid:{color:GRID}, ticks:{color:'#888',font:{size:11}},
+            stacked:false },
+        yL:{ position:'left', grid:{color:GRID},
+             ticks:{color:'#888',font:{size:11}},
+             title:{display:true, text:'Nº pacientes con BMR', color:'#bbb', font:{size:10}} },
+        yR:{ position:'right', grid:{drawOnChartArea:false},
+             min:0, max:100,
+             ticks:{color:'#D85A30', font:{size:11}, callback:v=>v+'%'},
+             title:{display:true, text:'% nosocomial / total', color:'#D85A30', font:{size:10}} }
+      }
+    }
+  });
+})();
+
+/* Tabla 1: Al ingreso y durante el ingreso */
+grouped('bmr_rel1',['SARM (MRSA)','E. Vancomicina','Pseudomonas','Acinetobacter R-Im.','BLEE','BGN-Carbapenemasa'],
+  [[22,0,23,0,5,51],[14,0,9,0,10,22],[9,0,5,0,26,13],[14,0,5,1,22,8],[13,0,1,0,21,13]]);
+
+/* Tabla 2: Durante el ingreso colonización + infección */
+grouped('bmr_rel2',['SARM (MRSA)','E. Vancomicina','Pseudomonas','Acinetobacter R-Im.','BLEE','BGN-Carbapenemasa'],
+  [[8,0,20,0,3,47],[2,0,5,0,4,15],[2,0,2,0,3,11],[2,0,2,0,2,5],[3,0,0,0,5,6]]);
+
+grouped('bmr4',['BGN-Carbapenemasa','Enterobacteria BLEE','SARM (MRSA)','Pseudomonas','Acinetobacter R-Im.'],
+  [[98,8,30,43,0],[37,14,16,14,0],[24,29,11,7,0],[13,24,16,7,1],[19,26,16,1,0]]);
+grouped('bmr5',['BGN-Carbapenemasa','Enterobacteria BLEE','SARM (MRSA)','Pseudomonas','Acinetobacter R-Im.'],
+  [[170,177,94,143,2],[113,143,68,76,0],[103,155,55,84,4],[114,211,76,70,27],[84,241,68,55,1]]);
+
+dualAxis('neum1',[48,8,5,6,5],[229,78,59,49,45],[3999,2677,2078,2116,2001],false);
+dualAxis('neum2',[11.57,3.41,2.30,2.95,2.54],[9.38,3.72,2.98,2.34,2.30],[5.16,3.49,2.68,2.60,2.44],true);
+dualAxis('neum3',[17.41,6.88,6.20,7.31,6.73],[13.33,6.60,6.06,4.51,4.28],[8.83,6.81,5.82,5.71,5.49],true);
+grouped('neum4',['Pseudomonas aerug.','Enterobacter clo.','Stenotrophomonas','SARM','Herpes simplex'],
+  [[17,10,2,5,4],[3,4,3,0,1],[1,0,1,0,0],[1,1,0,0,0],[2,0,1,1,0]]);
+grouped('neum5',['Pseudomonas aerug.','Staphylococcus aureus','Herpes simplex','Enterobacter clo.','Serratia marcescens'],
+  [[71,38,32,15,13],[18,8,7,9,8],[21,5,4,3,2],[12,6,0,3,5],[10,10,0,2,3]]);
+
+dualAxis('itu1',[22,8,4,6,5],[109,94,63,65,45],[2605,2167,1778,1814,1635],false);
+dualAxis('itu2',[5.30,3.41,1.84,2.95,2.54],[4.46,4.49,3.18,3.11,2.30],[3.36,2.82,2.30,2.23,2.00],true);
+dualAxis('itu3',[6.48,4.85,2.71,4.37,3.69],[5.06,5.30,3.75,3.69,2.71],[3.93,3.38,2.78,2.73,2.47],true);
+grouped('itu4',['E. faecalis','Pseudomonas aerug.','Candida albicans','E. coli','Klebsiella pneum.'],
+  [[6,4,3,3,0],[1,2,1,0,0],[0,2,0,0,1],[2,0,2,0,0],[0,0,0,1,1]]);
+grouped('itu5',['E. coli','Pseudomonas aerug.','E. faecalis','Candida albicans','Proteus mirabilis'],
+  [[23,20,16,17,12],[15,14,16,10,10],[15,9,7,3,4],[18,7,8,11,3],[17,6,6,1,2]]);
+
+dualAxis('bp1',[9,2,1,1,2],[139,73,51,51,41],[2505,1815,1359,1349,1202],false);
+dualAxis('bp2',[2.17,0.85,0.46,0.49,1.02],[5.69,3.48,2.57,2.44,2.09],[3.23,2.36,1.75,1.66,1.47],true);
+dualAxis('bp3',[2.76,1.26,0.76,0.77,1.81],[7.03,4.59,3.45,3.22,2.80],[4.02,3.07,2.33,2.21,1.97],true);
+grouped('bp4',['S. epidermidis','Enterobacter clo.','E. faecalis','E. faecium','Pseudomonas aerug.'],
+  [[3,2,1,0,0],[0,1,0,0,0],[0,0,0,1,0],[1,0,0,0,0],[0,0,0,0,1]]);
+grouped('bp5',['S. epidermidis','Pseudomonas aerug.','E. faecalis','Klebsiella pneum.','Serratia marcescens'],
+  [[33,13,24,14,8],[20,9,4,3,5],[10,9,2,5,4],[12,6,3,2,7],[13,6,9,3,1]]);
+
+dualAxis('bs1',[13,3,3,0,3],[73,46,42,41,46],[1373,1014,811,935,832],false);
+dualAxis('bs2',[3.13,1.28,1.38,0.00,1.52],[2.99,2.19,2.12,1.96,2.35],[1.77,1.32,1.05,1.15,1.02],true);
+grouped('bs3',['Enterobacter clo.','Pseudomonas aerug.','SARM','Serratia marcescens','E. coli'],
+  [[4,3,2,2,0],[1,0,0,0,1],[1,0,1,0,0],[0,0,0,0,0],[0,1,0,0,0]]);
+grouped('bs4',['Pseudomonas aerug.','Enterobacter clo.','Serratia marcescens','E. faecalis','Klebsiella pneum.'],
+  [[14,11,11,0,7],[11,6,5,5,8],[11,4,2,3,2],[6,2,6,3,5],[9,0,3,4,4]]);
+</script>
+</body>
+</html>
