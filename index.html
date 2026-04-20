@@ -232,6 +232,101 @@ main { margin-left: var(--nav-w); flex: 1; min-width: 0; display: flex; flex-dir
 
 .canvas-wrap { position: relative; width: 100%; }
 .dual-note { font-size: 11px; color: var(--muted); margin-top: 8px; font-family: 'DM Mono', monospace; }
+
+/* ── RESPONSIVE MÓVIL ── */
+@media (max-width: 700px) {
+  :root { --nav-w: 0px; }
+
+  body { flex-direction: column; }
+
+  nav {
+    position: fixed;
+    top: auto; bottom: 0; left: 0; right: 0;
+    width: 100%; height: auto;
+    flex-direction: row;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 200;
+    padding: 0;
+  }
+
+  .nav-logo, .nav-legend, .nav-footer { display: none; }
+
+  .nav-section {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-section::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 0;
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    border-bottom: 3px solid transparent;
+  }
+  .nav-btn .dot { width: 8px; height: 8px; }
+
+  .nav-btn.active.bmr  { background: var(--bmr-l);  color: var(--bmr-h);  border-bottom-color: var(--bmr-h); }
+  .nav-btn.active.neum { background: var(--neum-l); color: var(--neum-h); border-bottom-color: var(--neum-h); }
+  .nav-btn.active.itu  { background: var(--itu-l);  color: var(--itu-h);  border-bottom-color: var(--itu-h); }
+  .nav-btn.active.bact { background: var(--bact-l); color: var(--bact-h); border-bottom-color: var(--bact-h); }
+  .nav-btn.active.bsec { background: var(--bsec-l); color: var(--bsec-h); border-bottom-color: var(--bsec-h); }
+
+  main {
+    margin-left: 0;
+    padding-bottom: 70px;
+  }
+
+  .panel-header {
+    padding: 20px 16px 14px;
+    position: sticky;
+    top: 0;
+  }
+  .panel-header h1 { font-size: 18px; }
+  .panel-header p  { font-size: 11px; }
+
+  .panel-body { padding: 16px 16px 0; }
+
+  .chart-card {
+    padding: 16px 14px 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .card-top { flex-direction: column; gap: 8px; }
+  .card-label { align-self: flex-start; }
+  .chart-title { font-size: 13px; }
+  .chart-subtitle { font-size: 11px; }
+
+  .canvas-wrap { height: 220px !important; }
+
+  .legend { gap: 6px 12px; font-size: 11px; }
+
+  .panel-footer {
+    margin: 24px 16px 0;
+    padding: 14px 16px;
+    flex-wrap: wrap;
+  }
+  .footer-text { font-size: 10px; }
+
+  .sub-title { margin: 24px 0 14px; font-size: 9px; }
+}
 </style>
 </head>
 <body>
@@ -587,7 +682,9 @@ function show(s,btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+s).classList.add('active');
   btn.classList.add('active');
-  window.scrollTo(0,0);
+  window.scrollTo({top:0, behavior:'smooth'});
+  /* En móvil centrar el botón activo en la barra inferior */
+  btn.scrollIntoView({inline:'center', behavior:'smooth'});
 }
 
 function dualAxis(id,u,a,n,dec){
